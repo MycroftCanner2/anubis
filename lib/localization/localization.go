@@ -1,115 +1,85 @@
 package localization
 
-import (
-	"embed"
-	"encoding/json"
-	"net/http"
-	"strings"
-	"sync"
+import "net/http"
 
-	"github.com/TecharoHQ/anubis"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
-)
+type SimpleLocalizer struct{}
 
-//go:embed locales/*.json
-var localeFS embed.FS
-
-type LocalizationService struct {
-	bundle *i18n.Bundle
-}
-
-var (
-	globalService *LocalizationService
-	once          sync.Once
-)
-
-func NewLocalizationService() *LocalizationService {
-	once.Do(func() {
-		bundle := i18n.NewBundle(language.English)
-		bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-
-		// Read all JSON files from the locales directory
-		entries, err := localeFS.ReadDir("locales")
-		if err != nil {
-			// Try fallback - create a minimal service with default messages
-			globalService = &LocalizationService{bundle: bundle}
-			return
-		}
-
-		loadedAny := false
-		for _, entry := range entries {
-			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".json") {
-				filePath := "locales/" + entry.Name()
-				_, err := bundle.LoadMessageFileFS(localeFS, filePath)
-				if err != nil {
-					// Log error but continue with other files
-					continue
-				}
-				loadedAny = true
-			}
-		}
-
-		if !loadedAny {
-			// If no files were loaded successfully, create minimal service
-			globalService = &LocalizationService{bundle: bundle}
-			return
-		}
-
-		globalService = &LocalizationService{bundle: bundle}
-	})
-
-	// Safety check - if globalService is still nil, create a minimal one
-	if globalService == nil {
-		bundle := i18n.NewBundle(language.English)
-		bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-		globalService = &LocalizationService{bundle: bundle}
-	}
-
-	return globalService
-}
-
-func (ls *LocalizationService) GetLocalizer(lang string) *i18n.Localizer {
-	return i18n.NewLocalizer(ls.bundle, lang)
-}
-
-func (ls *LocalizationService) GetLocalizerFromRequest(r *http.Request) *i18n.Localizer {
-	if ls == nil || ls.bundle == nil {
-		// Fallback to a basic bundle if service is not properly initialized
-		bundle := i18n.NewBundle(language.English)
-		bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-		return i18n.NewLocalizer(bundle, "en")
-	}
-	acceptLanguage := r.Header.Get("Accept-Language")
-	return i18n.NewLocalizer(ls.bundle, acceptLanguage, "en")
-}
-
-// SimpleLocalizer wraps i18n.Localizer with a more convenient API
-type SimpleLocalizer struct {
-	Localizer *i18n.Localizer
-}
-
-// T provides a concise way to localize messages
-func (sl *SimpleLocalizer) T(messageID string) string {
-	return sl.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: messageID})
-}
-
-// Get the language that is used by the localizer by retrieving a well-known string that is required to be present
-func (sl *SimpleLocalizer) GetLang() string {
-	_, tag, err := sl.Localizer.LocalizeWithTag(&i18n.LocalizeConfig{MessageID: "loading"})
-	if err != nil {
-		return "en"
-	}
-	return tag.String()
-}
-
-// GetLocalizer creates a localizer based on the request's Accept-Language header or forcedLanguage option
 func GetLocalizer(r *http.Request) *SimpleLocalizer {
-	var localizer *i18n.Localizer
-	if anubis.ForcedLanguage == "" {
-		localizer = NewLocalizationService().GetLocalizerFromRequest(r)
-	} else {
-		localizer = NewLocalizationService().GetLocalizer(anubis.ForcedLanguage)
+	return &SimpleLocalizer{}
+}
+
+func (sl *SimpleLocalizer) T(messageID string) string {
+	if msg, ok := translations[messageID]; ok {
+		return msg
 	}
-	return &SimpleLocalizer{Localizer: localizer}
+	return messageID
+}
+
+func (sl *SimpleLocalizer) GetLang() string { return "en" }
+
+var translations = map[string]string{
+	"loading":                            "Loading...",
+	"why_am_i_seeing":                    "Why am I seeing this?",
+	"protected_by":                       "Protected by",
+	"protected_from":                     "From",
+	"made_with":                          "Made with ❤️ in 🇨🇦",
+	"mascot_design":                      "Mascot design by",
+	"ai_companies_explanation":           "You are seeing this because the administrator of this website has set up Anubis to protect the server against the scourge of AI companies aggressively scraping websites. This can and does cause downtime for the websites, which makes their resources inaccessible for everyone.",
+	"anubis_compromise":                  "Anubis is a compromise. Anubis uses a Proof-of-Work scheme in the vein of Hashcash, a proposed proof-of-work scheme for reducing email spam. The idea is that at individual scales the additional load is ignorable, but at mass scraper levels it adds up and makes scraping much more expensive.",
+	"hack_purpose":                       "Ultimately, this is a placeholder solution so that more time can be spent on fingerprinting and identifying headless browsers (EG: via how they do font rendering) so that the challenge proof of work page doesn't need to be presented to users that are much more likely to be legitimate.",
+	"simplified_explanation":             "This is a measure against bots and malicious requests similar to a CAPTCHA. However, instead of having to do work yourself, your browser is given a calculation task that it has to solve to ensure that it is a valid client. This concept is called <a href=\"https://en.wikipedia.org/wiki/Proof_of_work\">Proof of Work</a>. The task is calculated in a few seconds and you are granted access to the website. Thank you for your understanding and patience.",
+	"jshelter_note":                      "Please note that Anubis requires the use of modern JavaScript features that plugins like JShelter will disable. Please disable JShelter or other such plugins for this domain.",
+	"version_info":                       "This website is running Anubis version",
+	"try_again":                          "Try again",
+	"go_home":                            "Go home",
+	"contact_webmaster":                  "or if you believe you should not be blocked, please contact the webmaster at",
+	"connection_security":                "Please wait a moment while we ensure the security of your connection.",
+	"javascript_required":                "Sadly, you must enable JavaScript to get past this challenge. This is required because AI companies have changed the social contract around how website hosting works. A no-JS solution is a work-in-progress.",
+	"benchmark_requires_js":              "Running the benchmark tool requires JavaScript to be enabled.",
+	"difficulty":                         "Difficulty:",
+	"algorithm":                          "Algorithm:",
+	"compare":                            "Compare:",
+	"time":                               "Time",
+	"iters":                              "Iters",
+	"time_a":                             "Time A",
+	"iters_a":                            "Iters A",
+	"time_b":                             "Time B",
+	"iters_b":                            "Iters B",
+	"static_check_endpoint":              "This is just a check endpoint for your reverse proxy to use.",
+	"authorization_required":             "Authorization required",
+	"cookies_disabled":                   "Your browser is configured to disable cookies. Anubis requires cookies for the legitimate interest of making sure you are a valid client. Please enable cookies for this domain",
+	"access_denied":                      "Access Denied: error code",
+	"dronebl_entry":                      "DroneBL reported an entry",
+	"see_dronebl_lookup":                 "see",
+	"internal_server_error":              "Internal Server Error: administrator has misconfigured Anubis. Please contact the administrator and ask them to look for the logs around",
+	"invalid_redirect":                   "Invalid redirect",
+	"redirect_not_parseable":             "Redirect URL not parseable",
+	"redirect_domain_not_allowed":        "Redirect domain not allowed",
+	"missing_required_forwarded_headers": "Missing required X-Forwarded-* headers",
+	"failed_to_sign_jwt":                 "failed to sign JWT",
+	"invalid_invocation":                 "Invalid invocation of MakeChallenge",
+	"client_error_browser":               "Client Error: Please ensure your browser is up to date and try again later.",
+	"oh_noes":                            "Oh noes!",
+	"benchmarking_anubis":                "Benchmarking Anubis!",
+	"you_are_not_a_bot":                  "You are not a bot!",
+	"making_sure_not_bot":                "Making sure you're not a bot!",
+	"celphase":                           "CELPHASE",
+	"js_web_crypto_error":                "Your browser doesn't have a functioning web.crypto element. Are you viewing this over a secure context?",
+	"js_web_workers_error":               "Your browser doesn't support web workers (Anubis uses this to avoid freezing your browser). Do you have a plugin like JShelter installed?",
+	"js_cookies_error":                   "Your browser doesn't store cookies. Anubis uses cookies to determine which clients have passed challenges by storing a signed token in a cookie. Please enable storing cookies for this domain. The names of the cookies Anubis stores may vary without notice. Cookie names and values are not part of the public API.",
+	"js_context_not_secure":              "Your context is not secure!",
+	"js_context_not_secure_msg":          "Try connecting over HTTPS or let the admin know to set up HTTPS. For more information, see <a href=\"https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts#when_is_a_context_considered_secure\">MDN</a>.",
+	"js_calculating":                     "Calculating...",
+	"js_missing_feature":                 "Missing feature",
+	"js_challenge_error":                 "Challenge error!",
+	"js_challenge_error_msg":             "Failed to resolve check algorithm. You may want to reload the page.",
+	"js_calculating_difficulty":          "Calculating...<br/>Difficulty:",
+	"js_speed":                           "Speed:",
+	"js_verification_longer":             "Verification is taking longer than expected. Please do not refresh the page.",
+	"js_success":                         "Success!",
+	"js_done_took":                       "Done! Took",
+	"js_iterations":                      "iterations",
+	"js_finished_reading":                "I've finished reading, continue →",
+	"js_calculation_error":               "Calculation error!",
+	"js_calculation_error_msg":           "Failed to calculate challenge:",
 }

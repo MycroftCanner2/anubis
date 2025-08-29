@@ -15,7 +15,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
 	github.com/joho/godotenv v1.5.1
 	github.com/lum8rjack/go-ja4h v0.0.0-20250606032308-3a989c6635be
-	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/playwright-community/playwright-go v0.5200.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/redis/go-redis/v9 v9.11.0
@@ -24,7 +23,6 @@ require (
 	github.com/testcontainers/testcontainers-go v0.38.0
 	go.etcd.io/bbolt v1.4.2
 	golang.org/x/net v0.42.0
-	golang.org/x/text v0.27.0
 	google.golang.org/grpc v1.74.2
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.33.3
@@ -170,6 +168,7 @@ require (
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/telemetry v0.0.0-20250721140356-96f361d9aaf7 // indirect
 	golang.org/x/term v0.33.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/tools v0.35.0 // indirect
 	golang.org/x/vuln v1.1.4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074 // indirect
@@ -184,7 +183,6 @@ require (
 tool (
 	github.com/TecharoHQ/yeet/cmd/yeet
 	github.com/a-h/templ/cmd/templ
-	github.com/nicksnyder/go-i18n/v2/goi18n
 	github.com/suzuki-shunsuke/pinact/cmd/pinact
 	golang.org/x/tools/cmd/deadcode
 	golang.org/x/tools/cmd/goimports
