@@ -1,8 +1,0 @@
-package data
-
-import "embed"
-
-var (
-	//go:embed botPolicies.yaml all:apps all:bots all:clients all:common all:crawlers all:meta
-	BotPolicies embed.FS
-)

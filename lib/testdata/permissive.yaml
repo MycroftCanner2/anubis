@@ -1,4 +1,0 @@
-bots:
-  - import: (data)/common/allow-private-addresses.yaml
-
-dnsbl: false
