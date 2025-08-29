@@ -42,6 +42,10 @@ cp ../lib/localization/locales/*.json static/locales/
 for file in js/*.mjs js/worker/*.mjs; do
   esbuild "${file}" --sourcemap --bundle --minify --outfile=static/"${file}" --banner:js="${LICENSE}"
   gzip -f -k -n static/${file}
-  zstd -f -k --ultra -22 static/${file}
-  brotli -fZk static/${file}
+  if command -v zstd >/dev/null 2>&1; then
+    zstd -f -k --ultra -22 static/${file}
+  fi
+  if command -v brotli >/dev/null 2>&1; then
+    brotli -fZk static/${file}
+  fi
 done
