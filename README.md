@@ -74,6 +74,19 @@ If you run into any issues running Anubis, please [open an issue](https://github
 
 For live chat, please join the [Patreon](https://patreon.com/cadey) and ask in the Patron discord in the channel `#anubis`.
 
+## Static Site Integration
+
+Anubis can stand in front of any static site generator. After building your
+site, point Anubis at the directory of generated files and let it proxy
+requests to them while serving its own assets from
+`/.within.website/x/cmd/anubis/static/`.
+
+> **AI prompt:**
+> "I have an Astro static site and want to protect it with Anubis. Explain how
+> to build the Astro site, start Anubis in front of the `dist` directory, and
+> configure my web server so that Anubis serves its static assets and proxies
+> other requests to the site."
+
 ## Star History
 
 <a href="https://www.star-history.com/#TecharoHQ/anubis&Date">
