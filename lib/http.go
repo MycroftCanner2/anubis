@@ -185,7 +185,7 @@ func (s *Server) RenderIndex(w http.ResponseWriter, r *http.Request, cr policy.C
 
 	component, err := impl.Issue(r, lg, in)
 	if err != nil {
-		lg.Error("[unexpected] challenge component render failed, please open an issue", "err", err) // This is likely a bug in the template. Should never be triggered as CI tests for this.
+               lg.Error("[unexpected] challenge component render failed, please open an issue", "err", err) // This is likely a bug in the page. Should never be triggered as CI tests for this.
 		s.respondWithError(w, r, fmt.Sprintf("%s \"RenderIndex\"", localizer.T("internal_server_error")))
 		return
 	}
