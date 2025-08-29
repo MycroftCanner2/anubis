@@ -35,9 +35,6 @@ used under the terms of the Apache 2 license.
 for the JavaScript code in this page.
 */'
 
-# Copy localization files to static directory
-mkdir -p static/locales
-cp ../lib/localization/locales/*.json static/locales/
 
 for file in js/*.mjs js/worker/*.mjs; do
   esbuild "${file}" --sourcemap --bundle --minify --outfile=static/"${file}" --banner:js="${LICENSE}"
