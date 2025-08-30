@@ -81,10 +81,12 @@ requests to them while serving its own assets from
 `/.within.website/x/cmd/anubis/static/`.
 
 > **AI prompt:**
-> "I have an Astro static site and want to protect it with Anubis. Explain how
-> to build the Astro site, start Anubis in front of the `dist` directory, and
-> configure my web server so that Anubis serves its static assets and proxies
-> other requests to the site."
+> "I have an Astro static site and want to protect it with Anubis. I've cloned
+> the site's LLM scraping protection into the `/anubis/` directory; please
+> examine it and implement this so it runs at build. Explain how to build the
+> Astro site, start Anubis in front of the `dist` directory, ensure the scraping
+> protection runs during the build, and configure my web server so that Anubis
+> serves its static assets and proxies other requests to the site."
 
 ## Star History
 
